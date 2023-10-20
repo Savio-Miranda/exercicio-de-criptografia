@@ -19,5 +19,3 @@ def euclides_estendido(a: int, b: int):
 
     
     return [g, x, y]
-
-print(euclides_estendido(165, 285))

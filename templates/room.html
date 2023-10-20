@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Testing Diffie-Hellman</title>
+    </head>
+    <body>
+        <div>
+            <label id="group-generator">Group: Generator: </label>
+        </div>
+
+        <div>
+            <label id="username">Username:</label>
+        </div>
+        
+        <div>
+            <br>
+            <label id="private-key">Private key: </label>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+                integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+                crossorigin="anonymous">
+        </script>
+        
+        <script>
+            var group = "{{ group }}";
+            var generator = "{{ generator }}";
+        </script>
+        
+        <script src="{{ url_for('static', filename='js/room.js') }}"></script>
+        
+    </body>
+</html>
