@@ -4,7 +4,7 @@ Exercícios da matéria de tópicos de computação II, professor Roberto Samaro
 Aplicação do algoritmo de Diffie-Hellman (Algoritmo de Troca de Chaves)
 '''
 
-import operator, random
+import operator, random, math
 from other_exercises import euclides_extended as euclides
 
 
@@ -39,14 +39,18 @@ class Group:
         
         return i
 
+    
 
-    def _get_inverse(self, a: int, b: int):
+    @staticmethod
+    def get_inverse(a: int, b: int):
         mdc, x, y = euclides.euclides_estendido(a, b)
-        checks_inverse = (a * x) % self.order
+        checks_inverse = (a * x) % b
         if checks_inverse == 1:
             return x
         return y
     
+    
+
     def _find_generators(self) -> list:
         '''
         Find the group generators
@@ -157,9 +161,10 @@ class Elgamal(Group):
         """
         message = self._checks_module(message)
         r = self._random_group_element()
+        # a = g **r, b = m* g**(x**r)
         a = self._checks_module(self.public_generator ** r)
         b = self._checks_module(message * (self.public_key ** r))
-        ciphertext = (a, b)
+        ciphertext = a, b
         return ciphertext
     
 
@@ -168,29 +173,86 @@ class Elgamal(Group):
         Decodes an encoded message with Elgamal
         """
         a, b = ciphertext
-        inverse_of_a = self._get_inverse(a, self.order)
+        inverse_of_a = self.get_inverse(a, self.order)
         message_decoded = self._checks_module(b * (inverse_of_a ** self._secret_key))
         return message_decoded
 
 
 class RSA:
     def __init__(self, p: int, q: int):
+        """
+        Setup:
+        - p (prime)
+        - q (prime)
+        - n = p * q
+        - phi(n) = (p - 1) * (q - 1)
+        - e | 2 < e < phi(n): mdc(c, phi(n)) = 1
+        - d | e * d = 1 mod(phi(n))
+        - public key: (e, n)
+        - secret key: (d, n)
+        """
         self._n = p * q
         self._phi_n = (p - 1) * (q - 1)
         self.e = random.randint(2,self._phi_n)
         mdc, inversaA, inversaB = euclides.euclides_estendido(self.e, self._phi_n)
         self.d = self._new_secret_key
         self.public_key = (self.e, self._n)
-        self._secret_key = (self.d, self.n)
+        self._secret_key = (self.d, self._n)
     
     
     def _new_secret_key():
         pass
+    
+    def _generate_prime(self, number: int):
+        while self._primality_test(number) is False:
+            print("not prime...")
+            number += 1
+        return number
+    
+    
+    def _primality_test(self, number: int) -> bool:
+        if number % 2 == 0:
+            return False
+        
+        m, k = self._get_next_guess(number)
+        
+        # Escolher "a" pertencente a (1, n - 1)
+        a = random.randint(1, number - 2)
 
-#group = Group(19, "*")
-#group.diffie_hellman()
-user = Elgamal(97)
-ciphertext = user.elgamal_encode(8)
-print("texto cifrado: ", ciphertext)
-message = user.elgamal_decode(ciphertext)
-print("mensagem: ", message)
+        # Computar b = a^m (mod n) até um provável primo
+        b = (a**m) % number
+        for i in range(1, k):
+            if b == 1:
+                return False
+            elif b == (number - 1):
+                return True
+            b = (b**2) % number
+        
+        return False
+
+
+    def _get_next_guess(self, number):
+        # Encontrar 2^k . m = n - 1
+        k = 1
+        while (number - 1) % (2**k) == 0:
+            k += 1
+        m = (number - 1)/(2**(k - 1))
+        return int(m), k
+            
+
+#-------- GROUP ----------
+# group = Group(19, "*")
+# group.diffie_hellman()
+# Group.get_inverse(21, 123)
+
+#-------- ELGAMAL --------
+# user = Elgamal(97)
+# ciphertext = user.elgamal_encode(19)
+# print("texto cifrado: ", ciphertext)
+# message = user.elgamal_decode(ciphertext)
+# print("mensagem: ", message)
+
+# -------- RSA -----------
+teste = RSA(2, 3)
+my_prime = teste._generate_prime(4500)
+print("my prime: ", my_prime)
