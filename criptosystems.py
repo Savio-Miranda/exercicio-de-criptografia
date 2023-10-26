@@ -12,7 +12,7 @@ from group import Group
 class DiffieHellman(Group):
     def __init__(self, order: int | None=None):
         super().__init__("*", order)
-        self.public_generator = self.random_generator()
+        self.public_generator = self._find_random_generator()
         self._secret_key = self.random_group_element()
         self.public_key = self._checks_module(self.public_generator ** self._secret_key)
 
@@ -130,8 +130,8 @@ class RSA(Group):
     def publish_public_key(self):
         return self.public_key
 #-------- Diffie-Hellman ----------
-#user3 = DiffieHellman()
-#user3.test_diffie_hellman()
+user = DiffieHellman()
+user.test_diffie_hellman()
 
 #-------- ELGAMAL -----------------
 # user = Elgamal(97)
@@ -141,8 +141,8 @@ class RSA(Group):
 # print("mensagem decifrada elgamal: ", message)
 
 # -------- RSA --------------------
-user3 = RSA()
-ciphertext = user3.RSA_encode(87)
-print("texto cifrado RSA: ", ciphertext)
-message = user3.RSA_decode(ciphertext)
-print("mensagem decifrada RSA: ", message)
+# user3 = RSA()
+# ciphertext = user3.RSA_encode(87)
+# print("texto cifrado RSA: ", ciphertext)
+# message = user3.RSA_decode(ciphertext)
+# print("mensagem decifrada RSA: ", message)
