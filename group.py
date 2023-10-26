@@ -103,8 +103,8 @@ class Group:
     """
 
     def _find_random_generator(self) -> int:
-        a = random.randint(2, self.order - 2)
         while True:
+            a = random.randint(2, self.order - 2)
             g = self._checks_module(a**2)
             if g == 1: continue
             elif g == self.order - 1: continue
