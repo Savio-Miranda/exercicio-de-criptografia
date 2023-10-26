@@ -1,4 +1,4 @@
-def euclides_estendido(a: int, b: int):
+def euclides(a: int, b: int):
     t = b
     g = a
     x = 1
