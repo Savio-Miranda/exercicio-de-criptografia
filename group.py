@@ -3,16 +3,16 @@ from other_exercises.euclides_extended import euclides
 
 
 class Group:
-    def __init__(self, operator_notation: str, order: int | None=None):
+    def __init__(self, operator_notation: str, order: int | None=None, subgroup: int | None=None):
         """
-        Stablishes a Zp group with p as strong prime
+        Stablishes a Zp group with p as strong prime and q as subgroup
         """
-        if order is None:
-            order = self._generate_prime()
-        self._operations = {'+': operator.add, '*': operator.mul}
-        self.order = order
         self.operator = operator_notation
-        #self.generators = self._find_generators()
+        self.order = order
+        self.subgroup = subgroup
+        self._operations = {'+': operator.add, '*': operator.mul}
+        if (self.order is None) or (self.subgroup is None):
+            self.order, self.subgroup = self._generate_safe_prime()
 
 
     @staticmethod
@@ -20,6 +20,7 @@ class Group:
         mdc, x, y = euclides(a, b)
         #print(f"euclides: {mdc}, {x}, {y}")
         checks_inverse = (a * x) % b
+
         #print("checks inverse: ", checks_inverse)
         if checks_inverse == 1:
             return x
@@ -27,14 +28,21 @@ class Group:
         return 0
 
 
-    def _generate_prime(self):
-        probable_prime = random.randint(10, 100)
-        while self._primality_test(probable_prime) is False:
-            probable_prime += 1
+    def _generate_safe_prime(self):
+        prime = random.randint(10, 100)
+        while True:
+            q = (prime - 1)//2
+            p_is_prime = self._primality_test(prime)
+            q_is_prime = self._primality_test(q)
+            if p_is_prime and q_is_prime:
+                #print(f"p: {prime}, q: {q}")
+                break
+            #print("both not prime...")
+            prime += 1
 
-        return probable_prime
-    
-    
+        return prime, q
+
+
     def _primality_test(self, number: int) -> bool:
         if number % 2 == 0:
             return False
@@ -68,75 +76,17 @@ class Group:
     def _checks_module(self, n: int) -> int:
         return n % self.order if abs(n) >= self.order else n
     
-    """
-    def _get_order(self, n: int) -> int:
-        '''
-        Get the order of an element in the group
-        '''
-        table = self.cayley_table()
-        if (n != 0) and n not in table[0]:
-            raise AttributeError("element do not belong to the group")
-        
-        generated = []
-        result = 0
-        for i in range(self.order):
-            result = n**i if self.operator == '*' else n*i            
-            element = self._checks_module(result)
-            if element in generated:
-                break
-            generated.append(element)
-        
-        return i
-    
-    def _find_generators(self) -> list:
-        '''
-        Find the group generators
-        '''
-        generators = []
-        for element in range(self.order):
-            generator_order = self._get_order(element)
-            if generator_order == (self.order - 1):
-                generators.append(element)
-
-        
-        return generators
-    """
 
     def _find_random_generator(self) -> int:
         while True:
             a = random.randint(2, self.order - 2)
             g = self._checks_module(a**2)
-            if g == 1: continue
-            elif g == self.order - 1: continue
+            if (g == 1) or (g == (self.order - 1)):
+                continue
+            
             return g
 
-    """    
-    def random_generator(self) -> int:
-        # Return a random generator in a list of generators (for small group tests)
-        random_exp = random.randint(0, len(self.generators) - 1)
-        return self.generators[random_exp]
-    """
 
-    def random_group_element(self) -> int:
-        random_element = random.randint(1, self.order - 1)
+    def random_subgroup_element(self) -> int:
+        random_element = random.randint(1, self.subgroup)
         return random_element
-
-    """
-    def cayley_table(self) -> list:
-        '''
-        Creates the Cayley Table of order n
-        '''
-        matrice = []
-        start = 0
-        if self.operator == '*':
-            start = 1
-        for i in range(start, self.order):
-            line = []
-            for j in range(start, self.order):
-                element = self._operations[self.operator](i, j)
-                line.append(self._checks_module(element))
-            
-            matrice.append(line)
-        
-        return matrice
-    """
